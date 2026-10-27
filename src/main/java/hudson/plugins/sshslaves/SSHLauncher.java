@@ -1164,9 +1164,8 @@ public class SSHLauncher extends ComputerLauncher {
      */
     long getOverallLaunchTimeoutMillis() {
         long launchTimeoutMillis = TimeUnit.SECONDS.toMillis(getLaunchTimeoutSeconds());
-        long connectAttemptMillis = 2 * launchTimeoutMillis
-                + TimeUnit.SECONDS.toMillis(5)
-                + TimeUnit.SECONDS.toMillis(getRetryWaitTime());
+        long connectAttemptMillis =
+                2 * launchTimeoutMillis + TimeUnit.SECONDS.toMillis(5) + TimeUnit.SECONDS.toMillis(getRetryWaitTime());
         return (getMaxNumRetries() + 1L) * connectAttemptMillis + 5 * launchTimeoutMillis;
     }
 
