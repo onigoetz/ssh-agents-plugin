@@ -7,9 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import hudson.model.Computer;
+import hudson.model.Descriptor;
 import hudson.model.Node;
 import hudson.plugins.sshslaves.Messages;
 import hudson.plugins.sshslaves.SSHLauncher;
+import java.io.IOException;
 import java.time.Duration;
 import org.junit.jupiter.api.Tag;
 import org.testcontainers.containers.GenericContainer;
@@ -50,7 +52,7 @@ class AgentHungLoginConnectionTest extends AgentConnectionBaseTest {
     }
 
     @Override
-    void connectionTests() throws Exception {
+    void connectionTests() throws IOException, InterruptedException, Descriptor.FormException {
         // ForceCommand replaces "exit 0" with a command that never closes stdout, as a stalled login does.
         agentContainer.execInContainer(
                 "sh", "-c", "echo 'ForceCommand sleep 3600' >> /etc/ssh/sshd_config && pkill -HUP -o sshd");
@@ -72,7 +74,9 @@ class AgentHungLoginConnectionTest extends AgentConnectionBaseTest {
         assertTrue(computer.getLog().contains(Messages.SSHLauncher_launchCanceled()), computer.getLog());
 
         // A second attempt must run a real launch instead of stopping at "already connected".
-        assertTimeoutPreemptively(Duration.ofSeconds(90), () -> computer.connect(true).get());
+        assertTimeoutPreemptively(Duration.ofSeconds(90), () -> {
+            computer.connect(true).get();
+        });
         assertFalse(computer.getLog().contains(Messages.SSHLauncher_alreadyConnected()), computer.getLog());
     }
 
